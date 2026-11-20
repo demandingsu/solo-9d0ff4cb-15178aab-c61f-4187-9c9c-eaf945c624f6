@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}操作已阻止 · 隔声试验数据交付复核{% endblock %}
+{% block content %}
+<h2>操作已阻止</h2>
+<p class="err"><b>{{ message }}</b></p>
+<p>基于当前文件的预览、核查与确认均已被拒绝，以避免交付结果失真。</p>
+{% if st.last_subset_path %}
+<p>已保留上一版确认结果，可继续下载：
+  <a href="/last-subset">{{ st.last_subset_name }}</a></p>
+{% else %}
+<p class="muted">当前会话尚无已确认的上一版结果。</p>
+{% endif %}
+<p><a href="/">重新上传源库</a></p>
+{% endblock %}

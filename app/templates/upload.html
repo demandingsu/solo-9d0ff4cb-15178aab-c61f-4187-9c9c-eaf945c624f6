@@ -12,7 +12,10 @@
   <li><code>groups(id, name, ...)</code> — 试验组</li>
   <li><code>calibrations(id, device, ...)</code> — 校准记录</li>
   <li><code>tests(id, group_id, calibration_id, name, ...)</code> — 试验，calibration_id 可空</li>
-  <li><code>readings(id, test_id, calibration_id, control_reading_id, kind, ...)</code>
-      — 读数；control_reading_id 为对照读数引用（允许跨组），可空</li>
+  <li><code>readings(id, test_id, calibration_id, control_reading_id, kind, frequency_hz, ...)</code>
+      — 读数；control_reading_id 为对照读数引用（允许跨组），可空；
+      frequency_hz 用于引用质量核查（对照链频点一致性），为空会报缺频点</li>
 </ul>
+<p class="muted">确认报告前必须通过 <a href="/quality">引用质量核查</a>：
+  measurement 读数的对照链需频点一致且链末端为 control，无悬空、成环或缺频点。</p>
 {% endblock %}

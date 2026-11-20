@@ -96,6 +96,7 @@ class Hop:
 
     kind: str
     label: str
+    note: str | None = None
 
 
 @dataclass

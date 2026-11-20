@@ -24,9 +24,19 @@
   fieldset{border:1px solid #ddd;border-radius:6px;margin-bottom:1rem}
   legend{font-weight:600}
   code{background:#f4f4f4;padding:.1rem .3rem;border-radius:3px}
+  nav.topnav{display:flex;gap:1rem;border-bottom:2px solid #1565c0;margin-bottom:1.2rem;
+       padding-bottom:.5rem;font-size:.95rem}
+  nav.topnav a{color:#1565c0;text-decoration:none;font-weight:600}
+  nav.topnav a:hover{text-decoration:underline}
 </style>
 </head>
 <body>
+<nav class="topnav">
+  <a href="/">上传</a>
+  <a href="/select">选择试验</a>
+  <a href="/preview">交付预览</a>
+  <a href="/quality">引用质量核查</a>
+</nav>
 {% block content %}{% endblock %}
 </body>
 </html>

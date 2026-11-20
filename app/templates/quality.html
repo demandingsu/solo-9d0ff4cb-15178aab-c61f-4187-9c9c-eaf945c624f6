@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}引用质量核查 · 隔声试验数据交付复核{% endblock %}
+{% block content %}
+<h2>引用质量核查 — 对照链频点一致性</h2>
+<p class="muted">
+  源库：{{ source }} ｜ 勾选试验：{{ selected if selected else "（无）" }} ｜
+  <a href="/select">返回修改选择</a> ｜ <a href="/preview">交付预览</a>
+</p>
+<p class="muted">
+  对交付范围内的每条 measurement 读数沿 <code>control_reading_id</code> 逐跳核查：
+  链上相邻读数 <code>frequency_hz</code> 必须相同，且链末端必须是 control 读数；
+  同时识别缺频点、悬空引用与成环。每条问题链展示从起始 measurement 出发的完整引用链（含跨组引用）。
+</p>
+
+{% if source_changed %}
+<p class="err"><b>源库文件自上传后已被更换或修改。</b>
+  下列结果基于当前文件内容，确认报告将被拒绝。
+</p>
+{% endif %}
+
+<h3>核查结论</h3>
+{% if quality.ok %}
+<p class="ok">全部通过：共检查 {{ quality.checked }} 条 measurement 读数，
+  对照链频点一致、无缺频点/悬空/成环，且链末端均为 control 读数。</p>
+{% else %}
+<p class="err">未通过：共检查 {{ quality.checked }} 条 measurement 读数，
+  发现 {{ quality.issues|length }} 条问题对照链，涉及 {{ groups|length }} 个受影响试验。</p>
+{% endif %}
+
+{% if groups %}
+<h3>按受影响试验汇总（{{ groups|length }} 个试验）</h3>
+{% for g in groups %}
+<fieldset>
+  <legend>{{ g.heading }} — {{ g.issues|length }} 条问题链</legend>
+  {% for issue in g.issues %}
+  <div class="err">
+    <b>{{ issue.reason }}</b>
+    <span class="muted">（起始读数 #{{ issue.reading_id }}）</span>
+    <ol class="chain">
+      {% for hop in issue.chain %}
+      <li>{{ hop.label }}{% if hop.note %} <span class="muted">（{{ hop.note }}）</span>{% endif %}</li>
+      {% endfor %}
+    </ol>
+  </div>
+  {% endfor %}
+</fieldset>
+{% endfor %}
+{% else %}
+<p class="muted">未发现问题对照链。</p>
+{% endif %}
+
+<h3>确认报告</h3>
+{% if source_changed %}
+<form method="post" action="/download">
+  <button type="submit" class="primary" disabled>确认报告并下载 SQLite 子库</button>
+</form>
+<p class="err">源库已更换，确认被拒绝。
+  上一版已确认结果：
+  <a href="/last-subset">点此下载（若存在）</a>。</p>
+{% elif quality.ok and res.ok %}
+<form method="post" action="/download">
+  <button type="submit" class="primary">确认报告并下载 SQLite 子库</button>
+</form>
+{% else %}
+<form method="post" action="/download">
+  <button type="submit" class="primary" disabled>确认报告并下载 SQLite 子库</button>
+</form>
+<p class="muted">
+  {% if not res.ok %}引用解析存在冲突；{% endif %}
+  {% if not quality.ok %}引用质量核查未通过；{% endif %}
+  全部链通过后才允许确认报告。
+</p>
+{% endif %}
+{% endblock %}

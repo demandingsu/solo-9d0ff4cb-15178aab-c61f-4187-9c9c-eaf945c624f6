@@ -4,6 +4,12 @@
 <h2>交付预览</h2>
 <p class="muted">源库：{{ source }} ｜ <a href="/select">返回修改选择</a> ｜ <a href="/">重新上传</a></p>
 
+{% if source_changed %}
+<p class="err"><b>源库文件自上传后已被更换或修改。</b>
+  当前预览仅供参考，确认报告将被拒绝；上一版已确认结果仍可在
+  <a href="/quality">引用质量核查</a> 页取回。</p>
+{% endif %}
+
 <h3>交付内容汇总</h3>
 <table>
   <tr><th>组</th><th>试验</th><th>读数</th><th>校准记录</th></tr>
@@ -23,11 +29,22 @@
 <h3>沿引用从未勾选组带入的读数（{{ pulled_in|length }} 条）</h3>
 {% for rid, chain in pulled_in %}
 <ol class="chain">
-  {% for hop in chain %}<li>{{ hop.label }}</li>{% endfor %}
+  {% for hop in chain %}<li>{{ hop.label }}{% if hop.note %} <span class="muted">（{{ hop.note }}）</span>{% endif %}</li>{% endfor %}
 </ol>
 {% endfor %}
 {% else %}
 <p class="muted">无跨组带入的读数。</p>
+{% endif %}
+
+<h3>引用质量核查（对照链频点一致性）</h3>
+{% if quality.ok %}
+<p class="ok">核查通过：共检查 {{ quality.checked }} 条 measurement 读数，
+  全部对照链频点一致且链末端为 control 读数。
+  详情见 <a href="/quality">引用质量核查</a>。</p>
+{% else %}
+<p class="err">核查未通过：{{ quality.checked }} 条 measurement 读数中发现
+  {{ quality.issues|length }} 条问题对照链，已按受影响试验汇总。
+  详见 <a href="/quality">引用质量核查</a>。</p>
 {% endif %}
 
 {% if res.conflicts %}
@@ -37,17 +54,26 @@
 <div class="err">
   <b>{{ c.reason }}</b>
   <ol class="chain">
-    {% for hop in c.chain %}<li>{{ hop.label }}</li>{% endfor %}
+    {% for hop in c.chain %}<li>{{ hop.label }}{% if hop.note %} <span class="muted">（{{ hop.note }}）</span>{% endif %}</li>{% endfor %}
   </ol>
 </div>
 {% endfor %}
+{% endif %}
+
+{% if res.conflicts or not quality.ok or source_changed %}
 <form method="post" action="/download">
-  <button type="submit" class="primary" disabled>确认并下载 SQLite 子库</button>
+  <button type="submit" class="primary" disabled>确认报告并下载 SQLite 子库</button>
 </form>
+<p class="muted">
+  {% if source_changed %}源库已更换，{% endif %}
+  {% if res.conflicts %}存在引用冲突，{% endif %}
+  {% if not quality.ok %}引用质量核查未通过，{% endif %}
+  全部检查通过后才能确认报告。
+</p>
 {% else %}
-<p class="ok">引用校验通过：对照与校准引用均已补齐，无悬空、无指向已剔除读数的引用。</p>
+<p class="ok">引用解析与质量核查均通过，可以确认报告。</p>
 <form method="post" action="/download">
-  <button type="submit" class="primary">确认并下载 SQLite 子库</button>
+  <button type="submit" class="primary">确认报告并下载 SQLite 子库</button>
 </form>
 {% endif %}
 {% endblock %}
